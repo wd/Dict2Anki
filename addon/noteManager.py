@@ -116,6 +116,9 @@ def getOrCreateModelCardTemplate(modelObject, cardTemplateName):
         .answer {
             color: green;
 	}
+        .key {
+            color: red;
+        }
     '''
     mw.col.models.addTemplate(modelObject, cardTemplate)
 
