@@ -76,14 +76,18 @@ def getOrCreateModelCardTemplate(modelObject, cardTemplateName):
         <hr>
         释义：
         <div>Tap to View</div>
-        <hr style="height:1px;border:none;border-top:1px dashed #0066CC;background-color:#ffffff;">
-        短语：
-        <ul class='phrase'>{{phraseFront}}</ul>
-        <hr style="height:1px;border:none;border-top:1px dashed #0066CC;background-color:#ffffff;">
-        例句：
-        <ol>{{sentenceFront}}</ol>
-        {{BrEPron}}
-        {{AmEPron}}
+        {{#phraseFront}}
+            <hr style="height:1px;border:none;border-top:1px dashed #0066CC;background-color:#ffffff;">
+            短语：
+            <ul class='phrase'>{{phraseFront}}</ul>
+        {{/phraseFront}}
+        {{#sentenceFront}}
+            <hr style="height:1px;border:none;border-top:1px dashed #0066CC;background-color:#ffffff;">
+            例句：
+            <ol>{{sentenceFront}}</ol>
+        {{/sentenceFront}}
+        {{#BrEPron}}{{BrEPron}}{{/BrEPron}}
+        {{#AmEPron}}{{AmEPron}}{{/AmEPron}}
     '''
     cardTemplate['afmt'] = '''
         <table>
@@ -95,12 +99,16 @@ def getOrCreateModelCardTemplate(modelObject, cardTemplateName):
         <hr>
         释义：
         <div class='definition'>{{definition}}</div>
-        <hr style="height:1px;border:none;border-top:1px dashed #0066CC;background-color:#ffffff;">
-        短语：
-        <ul class='phrase'>{{phraseBack}}</ul>
-        <hr style="height:1px;border:none;border-top:1px dashed #0066CC;background-color:#ffffff;">
-        例句：
-        <ol class='sentence'>{{sentenceBack}}</ol>
+        {{#phraseBack}}
+            <hr style="height:1px;border:none;border-top:1px dashed #0066CC;background-color:#ffffff;">
+            短语：
+            <ul class='phrase'>{{phraseBack}}</ul>
+        {{/phraseBack}}
+        {{#sentenceBack}}
+            <hr style="height:1px;border:none;border-top:1px dashed #0066CC;background-color:#ffffff;">
+            例句：
+            <ol class='sentence'>{{sentenceBack}}</ol>
+        {{/sentenceBack}}
     '''
     modelObject['css'] = '''
         .card {
