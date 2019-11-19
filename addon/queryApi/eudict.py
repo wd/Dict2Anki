@@ -1,18 +1,16 @@
 import logging
 import requests
 from urllib3 import Retry
-from urllib.parse import urlencode
 from requests.adapters import HTTPAdapter
 from ..misc import AbstractQueryAPI
 from bs4 import BeautifulSoup
-from bs4.element import Comment
-logger = logging.getLogger('dict2Anki.queryApi.youdao')
+logger = logging.getLogger('dict2Anki.queryApi.eudict')
 __all__ = ['API']
 
 
 class Parser:
     def __init__(self, html, term):
-        self._soap= BeautifulSoup(html, 'html.parser')
+        self._soap = BeautifulSoup(html, 'html.parser')
         self.term = term
 
     @property
@@ -53,51 +51,58 @@ class Parser:
         }
 
         els = self._soap.select('.phonitic-line')
-        if els:
-            el = els[0]
-            links = el.select('a')
-            phons = el.select('.Phonitic')
+        if not els:
+            return pron
 
-            try:
-                pron['BrEPhonetic'] = phons[0].get_text(strip=True)
-            except KeyError:
-                pass
+        el = els[0]
+        links = el.select('a')
+        phons = el.select('.Phonitic')
 
-            try:
-                pron['BrEUrl'] = url + links[0]['data-rel']
-            except (TypeError, KeyError):
-                pass
+        if not links:
+            # 可能是只有一个发音的情况
+            links = self._soap.select('div .gv_details .voice-button')
+            # 返回两个相同的。下载只会按照用户选择下载一个，这样至少可以保证总是有发音
+            links = [links[0], links[0]] if links else ''
 
+        try:
+            pron['BrEPhonetic'] = phons[0].get_text(strip=True)
+        except (KeyError, IndexError):
+            pass
 
-            try:
-                pron['AmEPhonetic'] = phons[1].get_text(strip=True)
-            except KeyError:
-                pass
+        try:
+            pron['BrEUrl'] = url + links[0]['data-rel']
+        except (TypeError, KeyError, IndexError):
+            pass
 
-            try:
-                pron['AmEUrl'] = url + links[0]['data-rel']
-            except (TypeError, KeyError):
-                pass
+        try:
+            pron['AmEPhonetic'] = phons[1].get_text(strip=True)
+        except (KeyError, IndexError):
+            pass
+
+        try:
+            pron['AmEUrl'] = url + links[1]['data-rel']
+        except (TypeError, KeyError, IndexError):
+            pass
 
         return pron
 
     @property
-    def BrEPhonetic(self)->str:
+    def BrEPhonetic(self) -> str:
         """英式音标"""
         return self.pronunciations['BrEPhonetic']
 
     @property
-    def AmEPhonetic(self)->str:
+    def AmEPhonetic(self) -> str:
         """美式音标"""
         return self.pronunciations['AmEPhonetic']
 
     @property
-    def BrEPron(self)->str:
+    def BrEPron(self) -> str:
         """英式发音url"""
         return self.pronunciations['BrEUrl']
 
     @property
-    def AmEPron(self)->str:
+    def AmEPron(self) -> str:
         """美式发音url"""
         return self.pronunciations['AmEUrl']
 
@@ -108,7 +113,7 @@ class Parser:
         for el in els:
             try:
                 line = el.select('p')
-                sentence = line[0].get_text(strip=True)
+                sentence = "".join([ str(c) for c in line[0].contents])
                 sentence_translation = line[1].get_text(strip=True)
                 ret.append((sentence, sentence_translation))
             except KeyError as e:
@@ -116,7 +121,7 @@ class Parser:
         return ret
 
     @property
-    def image(self)->str:
+    def image(self) -> str:
         els = self._soap.select('div .word-thumbnail-container img')
         ret = None
         if els:
